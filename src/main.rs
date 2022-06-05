@@ -76,62 +76,78 @@ fn main() {
   debug!("Now Timestamp: {}", now_timestamp);
 
   let duration = now.signed_duration_since(dt_utc);
-  let duration_years = duration.num_days() / 365;
-  let duration_months = duration.num_days() / 30;
-  let duration_weeks = duration.num_weeks();
-  let duration_days = duration.num_days();
-  let duration_hours = duration.num_hours();
-  let duration_minutes = duration.num_minutes();
+  // let duration_years = duration.num_days() / 365;
+  // let duration_months = duration.num_days() / 30;
+  // let duration_weeks = duration.num_weeks();
+  // let duration_days = duration.num_days();
+  // let duration_hours = duration.num_hours();
+  // let duration_minutes = duration.num_minutes();
 
   debug!("Duration: {}", duration);
-  debug!(
-    "Years: {}, Months: {}, Weeks: {}, Days: {}, Hours: {}, Minutes {}",
-    duration_years,
-    duration_months,
-    duration_weeks,
-    duration_days,
-    duration_hours,
-    duration_minutes
-  );
+  // debug!(
+  //   "Years: {}, Months: {}, Weeks: {}, Days: {}, Hours: {}, Minutes {}",
+  //   duration_years,
+  //   duration_months,
+  //   duration_weeks,
+  //   duration_days,
+  //   duration_hours,
+  //   duration_minutes
+  // );
 
   let mut msg = String::new();
 
+  let duration_years = duration.num_days() / 365;
   if duration_years > 0 || debug == true {
-    msg.push_str(&format!("{} years ", duration_years));
+    msg.push_str(&format!("{} year(s) ", duration_years));
   }
   debug!("Duration (Years): {}", duration.num_days() / 365);
 
+  let years_in_months = duration_years * 12;
+  let duration_months = duration.num_days() / 30 - years_in_months - 1;
   if duration_months > 0 || debug == true {
-    msg.push_str(&format!("{} months ", duration_months));
+    msg.push_str(&format!("{} month(s) ", duration_months));
   }
   debug!("Duration in months: {}", duration.num_days() / 30);
 
-  let duration_weeks = duration.num_weeks();
+  let years_in_weeks = duration_years * 52;
+  let months_in_weeks = duration_months * 4;
+  let duration_weeks = duration.num_weeks() - years_in_weeks - months_in_weeks - 1;
   if duration_weeks > 0 || debug == true {
     msg.push_str(&format!("{} week(s) ", duration_weeks));
   }
   debug!("Duration (weeks): {}", duration_weeks);
 
+  let years_in_days = duration_years * 365;
+  let months_in_days = duration_months * 30;
   let weeks_in_days = duration_weeks * 7;
-  let duration_days = duration.num_days() - weeks_in_days;
+  let duration_days = duration.num_days() - weeks_in_days - months_in_days - years_in_days - 1;
   if duration_days > 0 || debug == true {
     msg.push_str(&format!("{} day(s) ", duration_days));
   }
   debug!("Duration (days): {}", duration_days);
 
-  let days_in_hours = duration_days * 24;
+  let years_in_hours = years_in_days * 24;
+  let months_in_hours = months_in_days * 24;
   let weeks_in_hours = weeks_in_days * 24;
-  let duration_hours = duration.num_hours() - days_in_hours - weeks_in_hours;
+  let days_in_hours = (duration_days + 1) * 24;
+  let duration_hours =
+    duration.num_hours() - days_in_hours - weeks_in_hours - months_in_hours - years_in_hours;
   if duration_hours > 0 || debug == true {
     msg.push_str(&format!("{} hour(s) ", duration_hours));
   }
   debug!("Duration (hours): {}", duration_hours);
 
-  let hours_in_minutes = duration_hours * 60;
-  let days_in_minutes = days_in_hours * 60;
+  let years_in_minutes = years_in_hours * 60;
+  let months_in_minutes = months_in_hours * 60;
   let weeks_in_minutes = weeks_in_hours * 60;
-  let duration_minutes =
-    duration.num_minutes() - hours_in_minutes - days_in_minutes - weeks_in_minutes;
+  let days_in_minutes = days_in_hours * 60;
+  let hours_in_minutes = duration_hours * 60;
+  let duration_minutes = duration.num_minutes()
+    - hours_in_minutes
+    - days_in_minutes
+    - weeks_in_minutes
+    - months_in_minutes
+    - years_in_minutes;
   if duration_minutes > 0 || debug == true {
     msg.push_str(&format!("{} minute(s)", duration_minutes));
   }
