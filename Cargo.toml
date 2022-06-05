@@ -1,0 +1,12 @@
+[package]
+name = "aria-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+clap = { version = "3.1.18", features = ["derive"] }
+chrono =  "0.4.19"
+chrono-tz = "0.6.1"
