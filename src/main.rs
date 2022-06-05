@@ -1,4 +1,3 @@
-#![allow(unused)]
 use chrono::DateTime;
 use chrono::Local;
 use chrono::NaiveDateTime;
@@ -6,21 +5,42 @@ use chrono::TimeZone;
 use chrono::Utc;
 use chrono_tz::Tz;
 use clap::Parser;
+use log::{debug, info};
 
 // create a struct CLI to hold the command line arguments
 #[derive(Parser)]
 #[clap(name = "demo")]
 struct Cli {
+  // the name for the event:
+  #[clap(short = 'n', long = "name", default_value = "aria")]
+  name: String,
+
   // the date of birth in format YYYY-MM-DD HH:MM:SS (default: current date)
-  #[clap(short, long)]
+  #[clap(short = 'd', long = "datetime")]
   datetime: Option<String>,
+
   // the timezone of the date (default: UTC)
-  #[clap(short, long)]
+  #[clap(short = 't', long = "timezone")]
   timezone: Option<String>,
+
+  // allow for debug flag
+  #[clap(short = 'v', long = "verbose")]
+  debug: bool,
 }
 
 fn main() {
   let args = Cli::parse();
+
+  let log_level: String = if args.debug {
+    "debug".to_string()
+  } else {
+    "info".to_string()
+  };
+
+  env_logger::init_from_env(
+    env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, log_level),
+  );
+
   let str_datetime: String = args.datetime.unwrap_or_else(|| {
     // get the current date
     let now = chrono::Local::now();
@@ -28,35 +48,35 @@ fn main() {
     now.format("%Y-%m-%d %H:%M:%S").to_string()
   });
   let datetime = NaiveDateTime::parse_from_str(&str_datetime, "%Y-%m-%d %H:%M:%S").unwrap();
-  println!("DateTime: {}", datetime);
+  debug!("DateTime: {}", datetime);
 
   let dt_local: DateTime<Local> = Local.from_local_datetime(&datetime).unwrap();
-  println!("Local: {}", dt_local.format("%Y-%m-%d %H:%M:%S"));
+  debug!("Local: {}", dt_local.format("%Y-%m-%d %H:%M:%S"));
 
   let dt_utc: DateTime<Utc> = Utc.from_utc_datetime(&datetime);
-  println!("UTC: {}", dt_utc.format("%Y-%m-%d %H:%M:%S"));
+  debug!("UTC: {}", dt_utc.format("%Y-%m-%d %H:%M:%S"));
 
   let str_timezone: String = args.timezone.unwrap_or_else(|| "UTC".to_string());
   let timezone: Tz = str_timezone.parse().unwrap();
-  println!("TimeZone: {:?}", timezone);
+  debug!("TimeZone: {:?}", timezone);
 
   // change datetime to UTC
   // let datetime_utc = datetime.with_timezone(&timezone);
   let utc: DateTime<Tz> = dt_local.with_timezone(&timezone);
-  println!("{}: {}", str_timezone, utc.format("%Y-%m-%d %H:%M:%S"));
+  debug!("{}: {}", str_timezone, utc.format("%Y-%m-%d %H:%M:%S"));
 
   let timestamp: i64 = utc.timestamp();
-  println!("Timestamp: {}", timestamp);
+  debug!("Timestamp: {}", timestamp);
 
   let now: DateTime<Utc> = Utc::now();
-  println!("Now: {}", now.format("%Y-%m-%d %H:%M:%S"));
+  debug!("Now: {}", now.format("%Y-%m-%d %H:%M:%S"));
 
   let now_timestamp: i64 = now.timestamp();
-  println!("Now Timestamp: {}", now_timestamp);
+  debug!("Now Timestamp: {}", now_timestamp);
 
   let duration = now.signed_duration_since(dt_utc);
-  println!("Duration: {}", duration);
-  println!(
+  debug!("Duration: {}", duration);
+  debug!(
     "Weeks: {}, Days: {}, Hours: {}, Minutes: {}",
     duration.num_weeks(),
     duration.num_days(),
@@ -70,14 +90,14 @@ fn main() {
   if duration_weeks > 0 {
     msg.push_str(&format!("{} week(s) ", duration_weeks));
   }
-  println!("Duration (weeks): {}", duration_weeks);
+  debug!("Duration (weeks): {}", duration_weeks);
 
   let weeks_in_days = duration_weeks * 7;
   let duration_days = duration.num_days() - weeks_in_days;
   if duration_days > 0 {
     msg.push_str(&format!("{} day(s) ", duration_days));
   }
-  println!("Duration (days): {}", duration_days);
+  debug!("Duration (days): {}", duration_days);
 
   let days_in_hours = duration_days * 24;
   let weeks_in_hours = weeks_in_days * 24;
@@ -85,7 +105,7 @@ fn main() {
   if duration_hours > 0 {
     msg.push_str(&format!("{} hour(s) ", duration_hours));
   }
-  println!("Duration (hours): {}", duration_hours);
+  debug!("Duration (hours): {}", duration_hours);
 
   let hours_in_minutes = duration_hours * 60;
   let days_in_minutes = days_in_hours * 60;
@@ -95,7 +115,8 @@ fn main() {
   if duration_minutes > 0 {
     msg.push_str(&format!("{} minute(s) ", duration_minutes));
   }
-  println!("Duration (minutes): {}", duration_minutes);
+  debug!("Duration (minutes): {}", duration_minutes);
 
-  println!("Duration: {}", msg);
+  let name = args.name;
+  info!("{} was born {} ago", name, msg);
 }
