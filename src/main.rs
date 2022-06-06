@@ -75,84 +75,110 @@ fn main() {
   let now_timestamp: i64 = now.timestamp();
   debug!("Now Timestamp: {}", now_timestamp);
 
-  let duration = now.signed_duration_since(dt_utc);
-  // let duration_years = duration.num_days() / 365;
-  // let duration_months = duration.num_days() / 30;
-  // let duration_weeks = duration.num_weeks();
-  // let duration_days = duration.num_days();
-  // let duration_hours = duration.num_hours();
-  // let duration_minutes = duration.num_minutes();
-
-  debug!("Duration: {}", duration);
-  // debug!(
-  //   "Years: {}, Months: {}, Weeks: {}, Days: {}, Hours: {}, Minutes {}",
-  //   duration_years,
-  //   duration_months,
-  //   duration_weeks,
-  //   duration_days,
-  //   duration_hours,
-  //   duration_minutes
-  // );
+  let duration = duration_since(dt_utc, now);
 
   let mut msg = String::new();
 
-  let duration_years = duration.num_days() / 365;
+  let duration_years = duration.years;
   if duration_years > 0 || debug == true {
     msg.push_str(&format!("{} year(s) ", duration_years));
   }
-  debug!("Duration (Years): {}", duration.num_days() / 365);
 
-  let years_in_months = duration_years * 12;
-  let duration_months = duration.num_days() / 30 - years_in_months - 1;
+  let duration_months = duration.months;
   if duration_months > 0 || debug == true {
     msg.push_str(&format!("{} month(s) ", duration_months));
   }
-  debug!("Duration in months: {}", duration.num_days() / 30);
 
-  let years_in_weeks = duration_years * 52;
-  let months_in_weeks = duration_months * 4;
-  let duration_weeks = duration.num_weeks() - years_in_weeks - months_in_weeks - 1;
+  let duration_weeks = duration.weeks;
   if duration_weeks > 0 || debug == true {
     msg.push_str(&format!("{} week(s) ", duration_weeks));
   }
-  debug!("Duration (weeks): {}", duration_weeks);
 
-  let years_in_days = duration_years * 365;
-  let months_in_days = duration_months * 30;
-  let weeks_in_days = duration_weeks * 7;
-  let duration_days = duration.num_days() - weeks_in_days - months_in_days - years_in_days - 1;
+  let duration_days = duration.days;
   if duration_days > 0 || debug == true {
     msg.push_str(&format!("{} day(s) ", duration_days));
   }
-  debug!("Duration (days): {}", duration_days);
+
+  let duration_hours = duration.hours;
+  if duration_hours > 0 || debug == true {
+    msg.push_str(&format!("{} hour(s) ", duration_hours));
+  }
+
+  let duration_minutes = duration.minutes;
+  if duration_minutes > 0 || debug == true {
+    msg.push_str(&format!("{} minute(s)", duration_minutes));
+  }
+
+  let name = args.name;
+  info!("{} was born {} ago", name, msg);
+}
+
+struct Duration {
+  years: i64,
+  months: i64,
+  weeks: i64,
+  days: i64,
+  hours: i64,
+  minutes: i64,
+}
+
+/// Returns the difference between two `DateTime`s in local `Duration` format.
+fn duration_since(start_date: DateTime<Utc>, end_date: DateTime<Utc>) -> Duration {
+  // let now: DateTime<Utc> = Utc::now();
+  debug!("To date:   {}", end_date.format("%Y-%m-%d %H:%M:%S"));
+  debug!("From date: {}", start_date.format("%Y-%m-%d %H:%M:%S"));
+  let duration = end_date.signed_duration_since(start_date);
+
+  let years = duration.num_days() / 365;
+  let remaining_days = duration.num_days() % 365;
+  debug!("Years: {}, Remaining days: {}", years, remaining_days);
+
+  let months = remaining_days / 30;
+  let remaining_days = remaining_days % 30;
+  debug!("Months: {}, Remaining days: {}", months, remaining_days);
+
+  let weeks = remaining_days / 7;
+  let remaining_days = remaining_days % 7;
+  debug!("Weeks: {}, Remaining days: {}", weeks, remaining_days);
+
+  let years_in_days = years * 365;
+  let months_in_days = months * 30;
+  let weeks_in_days = weeks * 7;
+  let days = duration.num_days() - weeks_in_days - months_in_days - years_in_days;
+  debug!("Days: {}", days);
 
   let years_in_hours = years_in_days * 24;
   let months_in_hours = months_in_days * 24;
   let weeks_in_hours = weeks_in_days * 24;
-  let days_in_hours = (duration_days + 1) * 24;
-  let duration_hours =
+  let days_in_hours = days * 24;
+  let hours =
     duration.num_hours() - days_in_hours - weeks_in_hours - months_in_hours - years_in_hours;
-  if duration_hours > 0 || debug == true {
-    msg.push_str(&format!("{} hour(s) ", duration_hours));
-  }
-  debug!("Duration (hours): {}", duration_hours);
+  debug!("Hours: {}", hours);
 
   let years_in_minutes = years_in_hours * 60;
   let months_in_minutes = months_in_hours * 60;
   let weeks_in_minutes = weeks_in_hours * 60;
   let days_in_minutes = days_in_hours * 60;
-  let hours_in_minutes = duration_hours * 60;
-  let duration_minutes = duration.num_minutes()
+  let hours_in_minutes = hours * 60;
+  let minutes = duration.num_minutes()
     - hours_in_minutes
     - days_in_minutes
     - weeks_in_minutes
     - months_in_minutes
     - years_in_minutes;
-  if duration_minutes > 0 || debug == true {
-    msg.push_str(&format!("{} minute(s)", duration_minutes));
-  }
-  debug!("Duration (minutes): {}", duration_minutes);
+  debug!("Minutes: {}", duration.num_minutes());
 
-  let name = args.name;
-  info!("{} was born {} ago", name, msg);
+  debug!(
+    "Years: {}, Months: {}, Weeks: {}, Days: {}, Hours: {}, Minutes: {}",
+    years, months, weeks, days, hours, minutes
+  );
+
+  return Duration {
+    years,
+    months,
+    weeks,
+    days,
+    hours,
+    minutes,
+  };
 }
