@@ -66,14 +66,8 @@ fn main() {
   let utc: DateTime<Tz> = dt_local.with_timezone(&timezone);
   debug!("{}: {}", str_timezone, utc.format("%Y-%m-%d %H:%M:%S"));
 
-  let timestamp: i64 = utc.timestamp();
-  debug!("Timestamp: {}", timestamp);
-
   let now: DateTime<Utc> = Utc::now();
   debug!("Now: {}", now.format("%Y-%m-%d %H:%M:%S"));
-
-  let now_timestamp: i64 = now.timestamp();
-  debug!("Now Timestamp: {}", now_timestamp);
 
   let duration = duration_since(dt_utc, now);
 
