@@ -5,6 +5,7 @@ use chrono::TimeZone;
 use chrono::Utc;
 use chrono_tz::Tz;
 use clap::Parser;
+use date_component::date_component;
 use log::{debug, info};
 
 // create a struct CLI to hold the command line arguments
@@ -105,6 +106,17 @@ fn main() {
 
   let name = args.name;
   info!("{} was born {} ago", name, msg);
+
+  let date_interval = date_component::calculate(&dt_utc, &now);
+  info!("{:?}", date_interval);
+
+  debug!(
+    "seconds: {}",
+    date_interval.interval_seconds / (60 * 60 * 24)
+  );
+  debug!("minutes: {}", date_interval.interval_minutes / (60 * 24));
+  debug!("hours: {}", date_interval.interval_hours / 24);
+  debug!("days: {}", date_interval.interval_day);
 }
 
 struct Duration {

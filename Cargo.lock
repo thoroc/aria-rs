@@ -18,6 +18,7 @@ dependencies = [
  "chrono",
  "chrono-tz",
  "clap",
+ "date_component",
  "env_logger",
  "log",
 ]
@@ -123,6 +124,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a37c35f1112dad5e6e0b1adaff798507497a18fceeb30cceb3bae7d1427b9213"
 dependencies = [
  "os_str_bytes",
+]
+
+[[package]]
+name = "date_component"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41e66ef10144508f322783bb5a2c190e999abca65476993fe088f0815d6251ea"
+dependencies = [
+ "chrono",
 ]
 
 [[package]]
