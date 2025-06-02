@@ -70,3 +70,55 @@ pub fn duration_since(start_date: DateTime<Utc>, end_date: DateTime<Utc>) -> Dur
         minutes,
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::TimeZone;
+
+    #[test]
+    fn test_duration_since() {
+        // Arrange
+        let start_date = Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap();
+        let end_date = Utc.with_ymd_and_hms(2023, 10, 1, 12, 30, 0).unwrap();
+        let expected_duration = Duration {
+            years: 3,
+            months: 9,
+            weeks: 0,
+            days: 4,
+            hours: 12,
+            minutes: 30,
+        };
+
+        // Act
+        let duration = duration_since(start_date, end_date);
+
+        // Assert
+        assert_eq!(
+            duration.years, expected_duration.years,
+            "Years should be {}",
+            expected_duration.years
+        );
+        assert_eq!(
+            duration.months, expected_duration.months,
+            "Months should be {}",
+            expected_duration.months
+        );
+        assert_eq!(
+            duration.weeks, expected_duration.weeks,
+            "Weeks should be {}",
+            expected_duration.weeks
+        );
+        assert_eq!(
+            duration.days, expected_duration.days,
+            "Days should be {}",
+            expected_duration.days
+        );
+        assert_eq!(
+            duration.hours, expected_duration.hours,
+            "Hours should be {}",
+            expected_duration.hours
+        );
+        assert_eq!(duration.minutes, 30, "Minutes should be 30");
+    }
+}
