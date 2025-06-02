@@ -1,3 +1,6 @@
+mod cli;
+mod duration;
+
 use chrono::DateTime;
 use chrono::Local;
 use chrono::NaiveDateTime;
@@ -8,26 +11,8 @@ use clap::Parser;
 use date_component::date_component;
 use log::{debug, info};
 
-// create a struct CLI to hold the command line arguments
-#[derive(Parser)]
-#[clap(name = "demo")]
-struct Cli {
-    // the name for the event:
-    #[clap(short = 'n', long = "name", default_value = "aria")]
-    name: String,
-
-    // the date of birth in format YYYY-MM-DD HH:MM:SS (default: current date)
-    #[clap(short = 'd', long = "datetime")]
-    datetime: Option<String>,
-
-    // the timezone of the date (default: UTC)
-    #[clap(short = 't', long = "timezone")]
-    timezone: Option<String>,
-
-    // allow for debug flag
-    #[clap(short = 'v', long = "verbose")]
-    debug: bool,
-}
+use cli::Cli;
+use duration::duration_since;
 
 fn main() {
     let args = Cli::parse();
@@ -117,74 +102,4 @@ fn main() {
     debug!("minutes: {}", date_interval.interval_minutes / (60 * 24));
     debug!("hours: {}", date_interval.interval_hours / 24);
     debug!("days: {}", date_interval.interval_days);
-}
-
-struct Duration {
-    years: i64,
-    months: i64,
-    weeks: i64,
-    days: i64,
-    hours: i64,
-    minutes: i64,
-}
-
-/// Returns the difference between two `DateTime`s in local `Duration` format.
-fn duration_since(start_date: DateTime<Utc>, end_date: DateTime<Utc>) -> Duration {
-    // let now: DateTime<Utc> = Utc::now();
-    debug!("To date:   {}", end_date.format("%Y-%m-%d %H:%M:%S"));
-    debug!("From date: {}", start_date.format("%Y-%m-%d %H:%M:%S"));
-    let duration = end_date.signed_duration_since(start_date);
-
-    let years = duration.num_days() / 365;
-    let remaining_days = duration.num_days() % 365;
-    debug!("Years: {}, Remaining days: {}", years, remaining_days);
-
-    let months = remaining_days / 30;
-    let remaining_days = remaining_days % 30;
-    debug!("Months: {}, Remaining days: {}", months, remaining_days);
-
-    let weeks = remaining_days / 7;
-    let remaining_days = remaining_days % 7;
-    debug!("Weeks: {}, Remaining days: {}", weeks, remaining_days);
-
-    let years_in_days = years * 365;
-    let months_in_days = months * 30;
-    let weeks_in_days = weeks * 7;
-    let days = duration.num_days() - weeks_in_days - months_in_days - years_in_days;
-    debug!("Days: {}", days);
-
-    let years_in_hours = years_in_days * 24;
-    let months_in_hours = months_in_days * 24;
-    let weeks_in_hours = weeks_in_days * 24;
-    let days_in_hours = days * 24;
-    let hours =
-        duration.num_hours() - days_in_hours - weeks_in_hours - months_in_hours - years_in_hours;
-    debug!("Hours: {}", hours);
-
-    let years_in_minutes = years_in_hours * 60;
-    let months_in_minutes = months_in_hours * 60;
-    let weeks_in_minutes = weeks_in_hours * 60;
-    let days_in_minutes = days_in_hours * 60;
-    let hours_in_minutes = hours * 60;
-    let minutes = duration.num_minutes()
-        - hours_in_minutes
-        - days_in_minutes
-        - weeks_in_minutes
-        - months_in_minutes
-        - years_in_minutes;
-    debug!("Minutes: {}", duration.num_minutes());
-
-    debug!(
-        "Years: {}, Months: {}, Weeks: {}, Days: {}, Hours: {}, Minutes: {}",
-        years, months, weeks, days, hours, minutes
-    );
-
-    return Duration {
-        years,
-        months,
-        weeks,
-        days,
-        hours,
-        minutes,
-    };
 }
